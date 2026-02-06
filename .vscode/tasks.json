@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-api",
+      "type": "shell",
+      "command": "npx nx run api:build --configuration=development",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    {
+      "label": "serve-api",
+      "type": "shell",
+      "command": "npx nx run api:serve",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "type": "nx",
+      "project": "",
+      "command": "run",
+      "positional": "@host-pulse/source:prisma:migrate",
+      "flags": [],
+      "problemMatcher": [],
+      "label": "nx: nx run @host-pulse/source:prisma:migrate"
+    },
+    {
+      "type": "nx",
+      "project": "",
+      "command": "run",
+      "positional": "@host-pulse/source:prisma:generate",
+      "flags": [],
+      "problemMatcher": [],
+      "label": "nx: nx run @host-pulse/source:prisma:generate"
+    }
+  ]
+}

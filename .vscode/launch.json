@@ -1,0 +1,51 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "Attach to Chrome",
+      "port": 9222,
+      "request": "attach",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}"
+    },
+
+
+
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug API (NestJS)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--inspect"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/api/src/main.ts",
+      "outFiles": ["${workspaceFolder}/api/dist/**/*.js"],
+      "sourceMaps": true,
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug API (Built)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--inspect"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/api/dist/main.js",
+      "sourceMaps": true,
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "preLaunchTask": "build-api"
+    }
+  ]
+}

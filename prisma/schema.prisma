@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  hashedPassword String
+  phone          String?
+  firstName      String?
+  lastName       String?
+  name           String?   // Full name field
+  role           String    @default("guest") // "guest" or "host"
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  properties Property[] @relation("HostProperties")
+  bookings   Booking[]
+  revenueRecords RevenueRecord[]
+}
+
+model Property {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  location    Json?     // GeoJSON format
+  amenities   String[]
+  price       Float
+  photos      String[]
+  hostId      Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  host     User      @relation("HostProperties", fields: [hostId], references: [id])
+  bookings Booking[]
+  revenueRecords RevenueRecord[]
+}
+
+
+model Payment {
+  id              Int       @id @default(autoincrement())
+  bookingId       Int
+  amount          Float
+  method          String    @default("mpesa") // "mpesa", "card", etc.
+  status          String    @default("pending") // "pending", "success", "failed"
+  mpesaTxId       String?
+  phoneNumber     String?
+  receiptNumber   String?
+  transactionDate DateTime?
+  resultCode      String?
+  resultDesc      String?
+  processedAt     DateTime?
+  idempotencyKey  String?
+  
+  // Escrow fields
+  escrowReleased  Boolean   @default(false)
+  escrowHeldUntil DateTime?
+  escrowReleasedAt DateTime?
+  escrowReleasedBy Int?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model RevenueRecord {
+  id                Int       @id @default(autoincrement())
+  bookingId         Int
+  hostId            Int
+  propertyId        Int
+  grossAmount       Decimal   @db.Decimal(10, 2)
+  commission        Decimal   @db.Decimal(10, 2)
+  vat               Decimal   @db.Decimal(10, 2)
+  netAmount         Decimal   @db.Decimal(10, 2)
+  payoutStatus      String    @default("pending") // "pending", "processing", "paid", "failed"
+  payoutDate        DateTime?
+  payoutTransactionId String?
+  payoutError       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  host     User      @relation(fields: [hostId], references: [id])
+  property Property  @relation(fields: [propertyId], references: [id])
+  booking  Booking   @relation(fields: [bookingId], references: [id])
+}
+
+model Booking {
+  id        Int      @id @default(autoincrement())
+  userId   Int
+  propertyId Int
+  startDate DateTime
+  endDate   DateTime
+  total     Float
+  commission Float?  // Optional commission override
+  status    String   @default("pending") // "pending", "confirmed", "cancelled"
+  dates     Json?    // Flexible date storage
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id])
+  property Property  @relation(fields: [propertyId], references: [id])
+  payments Payment[]
+  revenueRecords RevenueRecord[]
+}
