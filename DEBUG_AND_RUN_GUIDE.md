@@ -56,10 +56,11 @@ The launch configurations are in `.vscode/launch.json`:
 Create `.env` in the root directory:
 ```env
 PORT=3000
-DATABASE_URL=postgresql://user:password@localhost:5432/hostpulse
-JWT_ACCESS_SECRET=your-secret-key
 MPESA_CONSUMER_KEY=your-key
-MPESA_CONSUMER_SECRET=your-secret
+DATABASE_URL=postgresql://username:<REPLACE_WITH_DB_PASSWORD>@localhost:5432/hostpulse
+JWT_ACCESS_SECRET=<REPLACE_WITH_JWT_ACCESS_SECRET>
+
+MPESA_CONSUMER_SECRET=<REPLACE_WITH_MPESA_CONSUMER_SECRET>
 # ... other env vars
 ```
 

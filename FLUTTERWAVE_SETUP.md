@@ -6,8 +6,8 @@ Add the following to your `.env` file in the root directory:
 
 ```env
 # Flutterwave Configuration
-FLUTTERWAVE_SECRET_KEY=your_flutterwave_secret_key_here
-FLUTTERWAVE_PUBLIC_KEY=your_flutterwave_public_key_here
+FLUTTERWAVE_SECRET_KEY=<REPLACE_WITH_FLUTTERWAVE_SECRET_KEY>
+FLUTTERWAVE_PUBLIC_KEY=<REPLACE_WITH_FLUTTERWAVE_PUBLIC_KEY>
 
 # Optional: Flutterwave Webhook Secret (for webhook verification)
 FLUTTERWAVE_WEBHOOK_SECRET=your_webhook_secret_here

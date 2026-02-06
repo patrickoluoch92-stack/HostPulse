@@ -35,8 +35,8 @@ Add to your `.env` file in the root directory:
 
 ```env
 # Flutterwave Configuration
-FLUTTERWAVE_SECRET_KEY=your_flutterwave_secret_key_here
-FLUTTERWAVE_PUBLIC_KEY=your_flutterwave_public_key_here
+FLUTTERWAVE_SECRET_KEY=<REPLACE_WITH_FLUTTERWAVE_SECRET_KEY>
+FLUTTERWAVE_PUBLIC_KEY=<REPLACE_WITH_FLUTTERWAVE_PUBLIC_KEY>
 ```
 
 ### 2. Get Flutterwave API Keys

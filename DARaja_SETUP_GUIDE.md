@@ -55,7 +55,7 @@ MPESA_ENVIRONMENT=sandbox  # Change to 'production' for live
 
 # Daraja OAuth Credentials
 MPESA_CONSUMER_KEY=your_consumer_key_here
-MPESA_CONSUMER_SECRET=your_consumer_secret_here
+MPESA_CONSUMER_SECRET=<REPLACE_WITH_MPESA_CONSUMER_SECRET>
 
 # STK Push Configuration
 MPESA_SHORTCODE=your_shortcode_here

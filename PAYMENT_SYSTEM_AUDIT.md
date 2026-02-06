@@ -170,7 +170,7 @@ Guest → Booking → Payment Initiation → Daraja STK Push → M-Pesa
 # Daraja Configuration
 MPESA_ENVIRONMENT=sandbox|production
 MPESA_CONSUMER_KEY=your_consumer_key
-MPESA_CONSUMER_SECRET=your_consumer_secret
+MPESA_CONSUMER_SECRET=<REPLACE_WITH_MPESA_CONSUMER_SECRET>
 MPESA_SHORTCODE=your_shortcode
 MPESA_PASSKEY=your_passkey
 MPESA_CERTIFICATE_PATH=/path/to/cert.pem  # Production only

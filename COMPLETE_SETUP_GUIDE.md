@@ -145,7 +145,7 @@ npx nx serve apps
 2. **Register a User**:
    - Click "Register" tab
    - Email: `test@example.com`
-   - Password: `password123`
+   - Password: `<REPLACE_WITH_YOUR_POSTGRES_PASSWORD>`
    - Phone (optional): `+254712345678`
    - Click "Register"
    - ✅ Should see "Successfully registered!" and be logged in

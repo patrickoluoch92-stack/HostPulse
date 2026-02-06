@@ -163,7 +163,7 @@ const checkoutRequestId = body.Body?.stkCallback?.CheckoutRequestID;
 # Daraja Configuration
 MPESA_ENVIRONMENT=sandbox
 MPESA_CONSUMER_KEY=your_consumer_key
-MPESA_CONSUMER_SECRET=your_consumer_secret
+MPESA_CONSUMER_SECRET=<REPLACE_WITH_MPESA_CONSUMER_SECRET>
 MPESA_SHORTCODE=your_shortcode
 MPESA_PASSKEY=your_passkey
 MPESA_CALLBACK_URL=https://your-domain.com/api/payments/mpesa/webhook
