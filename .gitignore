@@ -48,3 +48,6 @@ Thumbs.db
 out
 
 /generated/prisma
+
+# Local env should not be committed
+.env
