@@ -16,8 +16,9 @@ export class BookingsController {
 
   @Post()
   async create(@Request() req, @Body() dto: CreateBookingDto) {
+    const userId = req.user?.id ?? req.user?.userId ?? req.user?.sub;
     return this.bookingsService.create(
-      req.user.id,
+      userId,
       dto.propertyId,
       dto.startDate,
       dto.endDate,
