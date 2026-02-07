@@ -6,6 +6,8 @@ export class BookingsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: number, propertyId: number, startDate: string, endDate: string, total: number) {
+    // debug: log inputs to diagnose undefined propertyId
+    // debug logs removed
     // Check if property exists
     const property = await this.prisma.property.findUnique({
       where: { id: propertyId },

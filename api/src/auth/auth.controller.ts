@@ -1,7 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
-@Controller('auth')
+// Renamed to avoid collision with app/auth
+@Controller('legacy-auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

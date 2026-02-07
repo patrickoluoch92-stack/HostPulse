@@ -2,7 +2,8 @@ import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 
-@Controller('bookings')
+// Renamed to avoid route collision with app/bookings
+@Controller('legacy-bookings')
 @UseGuards(JwtAuthGuard)
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
