@@ -25,7 +25,7 @@ Based on the setup verification, here's what's installed and what needs to be do
 
 Your `.env` file currently has:
 ```
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hostpulse?schema=public"
+DATABASE_URL="postgresql://postgres:YOUR_DB_PASSWORD@localhost:5432/hostpulse?schema=public"
 ```
 
 **If this password is incorrect**, update the `.env` file with your actual PostgreSQL password.

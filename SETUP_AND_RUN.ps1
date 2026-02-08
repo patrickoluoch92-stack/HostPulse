@@ -99,7 +99,7 @@ if (Test-Path $innerEnvPath) {
     Write-Host "  ✗ .env file not found in workspace folder" -ForegroundColor Red
     Write-Host "    Creating .env file with default values..." -ForegroundColor Yellow
     $envContent = @'
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hostpulse?schema=public"
+DATABASE_URL="postgresql://postgres:YOUR_DB_PASSWORD@localhost:5432/hostpulse?schema=public"
 JWT_ACCESS_SECRET="dev-secret-change-me-in-production"
 PORT=3000
 '@
@@ -128,7 +128,7 @@ if (Test-Path $outerEnvPath) {
     Write-Host "  ⚠ .env file not found in repo root (needed for Prisma)" -ForegroundColor Yellow
     Write-Host "    Creating repo root .env file..." -ForegroundColor Gray
     $outerEnvContent = @'
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hostpulse?schema=public"
+DATABASE_URL="postgresql://postgres:YOUR_DB_PASSWORD@localhost:5432/hostpulse?schema=public"
 '@
     $outerEnvContent | Out-File -FilePath $outerEnvPath -Encoding utf8
     Write-Host "  ✓ Repo root .env file created" -ForegroundColor Green

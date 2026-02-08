@@ -27,7 +27,7 @@
 
 **Your `.env` file has:**
 ```
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hostpulse?schema=public"
+DATABASE_URL="postgresql://postgres:YOUR_DB_PASSWORD@localhost:5432/hostpulse?schema=public"
 ```
 
 **To Fix:**
