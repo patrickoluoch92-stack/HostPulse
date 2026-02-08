@@ -1,0 +1,21 @@
+{
+  "name": "apps",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps",
+        "command": "npx next dev --hostname 127.0.0.1 --port 4200",
+"env": {
+        "HOST": "127.0.0.1",
+        "PORT": "4200"
+      }
+      },
+      "configurations": {}
+    }
+  }
+}

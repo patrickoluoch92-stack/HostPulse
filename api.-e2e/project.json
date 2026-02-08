@@ -1,0 +1,22 @@
+{
+  "name": "api.-e2e",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "api.-e2e/src",
+  "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["api"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run api:serve",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "production": {
+          "command": "nx run api:serve --configuration=production"
+        }
+      }
+    }
+  }
+}
