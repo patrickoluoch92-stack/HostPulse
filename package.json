@@ -5,6 +5,8 @@
   "scripts": {
     "doctor": "node scripts/doctor.js",
     "db:check": "node scripts/check-db.js",
+    "hospitality:sync": "node scripts/hospitality-sync.js",
+    "hospitality:sync:dry": "node scripts/hospitality-sync.js --dry-run",
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
     "prisma:seed": "ts-node prisma/seed.ts",

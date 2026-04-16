@@ -29,6 +29,34 @@ npm run start:api
 2. Terminal 2: `npx nx run apps:dev` (or `.\run-frontend.ps1` for frontend)
 3. Open **http://127.0.0.1:4200** for the app and **http://127.0.0.1:3000/api** for the API.
 
+## Hospitality data expansion pipeline
+
+This repository includes a reusable hospitality discovery and ingestion pipeline for Kenya.
+
+```powershell
+# full run (all counties)
+npm run hospitality:sync -- --min-quality 5
+
+# dry run (no inserts)
+npm run hospitality:sync:dry
+```
+
+- Output report: `artifacts/hospitality-sync-report.json`
+- API search endpoint: `GET /api/hospitality`
+- API stats endpoint: `GET /api/hospitality/stats`
+
+Example query:
+
+```text
+GET http://127.0.0.1:3000/api/hospitality?county=Nairobi&category=hotel&page=1&pageSize=10
+```
+
+To run periodically, schedule:
+
+```bash
+0 2 * * * cd /workspace && npm run hospitality:sync -- --min-quality 5 >> /workspace/artifacts/hospitality-sync-cron.log 2>&1
+```
+
 ## Other options
 
 ### Run API script
