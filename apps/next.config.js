@@ -4,7 +4,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const API_PROXY_TARGET = (process.env.NEXT_PUBLIC_API_PROXY || 'http://127.0.0.1:3000/api').replace(/\/$/, '');
+const API_PROXY_TARGET = (
+  process.env.NEXT_PUBLIC_API_PROXY || 'http://127.0.0.1:3000/api'
+).replace(/\/$/, '');
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}

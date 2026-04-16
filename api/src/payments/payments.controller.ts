@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   Post,
   Get,
   Param,
@@ -8,8 +9,29 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { InitiateMpesaPaymentDto } from './dto/initiate-mpesa-payment.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WebhookSignatureGuard } from '../auth/webhook-signature.guard';
+import { IsObject, IsOptional, IsString } from 'class-validator';
+
+class WebhookPayloadDto {
+  @IsOptional()
+  @IsObject()
+  Body?: Record<string, unknown>;
+}
+
+class B2CCallbackDto {
+  @IsOptional()
+  @IsString()
+  ConversationID?: string;
+
+  @IsOptional()
+  @IsString()
+  OriginatorConversationID?: string;
+
+  @IsOptional()
+  @IsObject()
+  Result?: Record<string, unknown>;
+}
 
 @Controller('payments/mpesa')
 export class PaymentsController {
@@ -29,17 +51,23 @@ export class PaymentsController {
   }
 
   @Post('webhook')
-  async webhook(@Body() body: any) {
+  @HttpCode(200)
+  @UseGuards(WebhookSignatureGuard)
+  async webhook(@Body() body: WebhookPayloadDto) {
     return this.paymentsService.handleWebhook(body);
   }
 
   @Post('b2c-result')
-  async b2cResult(@Body() body: any) {
+  @HttpCode(200)
+  @UseGuards(WebhookSignatureGuard)
+  async b2cResult(@Body() body: B2CCallbackDto) {
     return this.paymentsService.handleB2CResult(body);
   }
 
   @Post('b2c-timeout')
-  async b2cTimeout(@Body() body: any) {
+  @HttpCode(200)
+  @UseGuards(WebhookSignatureGuard)
+  async b2cTimeout(@Body() body: B2CCallbackDto) {
     return this.paymentsService.handleB2CTimeout(body);
   }
 

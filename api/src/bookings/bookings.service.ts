@@ -31,28 +31,23 @@ export class BookingsService {
       throw new NotFoundException('Property not found');
     }
 
-    // Check availability - look for overlapping bookings
-    const existingBookings = await this.prisma.booking.findMany({
+    // Query overlap directly in the database for scalability.
+    const overlappingBooking = await this.prisma.booking.findFirst({
       where: {
         propertyId,
         status: {
           in: ['pending', 'confirmed'],
         },
+        AND: [
+          { startDate: { lt: end } },
+          { endDate: { gt: start } },
+        ],
       },
+      select: { id: true },
     });
 
-    for (const booking of existingBookings) {
-      const bookingStart = booking.startDate;
-      const bookingEnd = booking.endDate;
-
-      // Check for overlap
-      if (
-        (start >= bookingStart && start < bookingEnd) ||
-        (end > bookingStart && end <= bookingEnd) ||
-        (start <= bookingStart && end >= bookingEnd)
-      ) {
-        throw new BadRequestException('Property is not available for the selected dates');
-      }
+    if (overlappingBooking) {
+      throw new BadRequestException('Property is not available for the selected dates');
     }
 
     // Calculate commission (optional, can be set later)

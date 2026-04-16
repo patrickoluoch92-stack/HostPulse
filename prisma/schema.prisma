@@ -114,3 +114,50 @@ model Booking {
   payments Payment[]
   revenueRecords RevenueRecord[]
 }
+
+enum HospitalityCategory {
+  HOTEL
+  LODGE
+  RESORT
+  GUEST_HOUSE
+  SERVICED_APARTMENT
+  AIRBNB
+  TOURS_TRAVEL
+  SAFARI_OPERATOR
+}
+
+model HospitalityBusiness {
+  id             Int                 @id @default(autoincrement())
+  name           String
+  normalizedName String
+  dedupeKey      String              @unique
+  category       HospitalityCategory
+  county         String
+  town           String?
+  area           String?
+  address        String?
+  phone          String?
+  email          String?
+  website        String?
+  bookingLink    String?
+  latitude       Float?
+  longitude      Float?
+  description    String?
+  amenities      String[]
+  source         String
+  sourceRef      String?
+  qualityScore   Int                 @default(0)
+  isVerified     Boolean             @default(false)
+  isActive       Boolean             @default(true)
+  metadata       Json?
+  lastSeenAt     DateTime            @default(now())
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([source, sourceRef])
+  @@index([county, category])
+  @@index([category])
+  @@index([normalizedName])
+  @@index([county, town])
+  @@index([lastSeenAt])
+}

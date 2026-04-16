@@ -171,7 +171,7 @@ export class EscrowService {
       isReleased,
       heldUntil: payment.escrowHeldUntil,
       releasedAt: payment.escrowReleasedAt,
-      canRelease: isHeld && !isReleased && payment.status === 'success',
+      canRelease: !isHeld && !isReleased && payment.status === 'success',
     };
   }
 }

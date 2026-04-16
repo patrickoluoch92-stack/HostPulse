@@ -3,15 +3,21 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "prisma:generate": "prisma generate --schema=../prisma/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema=../prisma/schema.prisma",
-    "prisma:seed": "ts-node ../prisma/seed.ts",
-    "prisma:studio": "prisma studio --schema=../prisma/schema.prisma",
-    "start:frontend": "nx run apps:dev",
-    "start:api": "nx run api:serve"
+    "doctor": "node scripts/doctor.js",
+    "db:check": "node scripts/check-db.js",
+    "hospitality:sync": "node scripts/hospitality-sync.js",
+    "hospitality:sync:dry": "node scripts/hospitality-sync.js --dry-run",
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
+    "dev": "npm run doctor && concurrently -k -n API,WEB -c yellow,cyan \"nx run api:serve\" \"nx run apps:dev\"",
+    "start:frontend": "npm run doctor && nx run apps:dev",
+    "start:api": "npm run doctor && nx run api:serve",
+    "firebase:check": "node scripts/firebase-check.js"
   },
   "prisma": {
-    "seed": "ts-node ../prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +32,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "firebase": "^12.4.0",
+    "firebase-admin": "^13.5.0",
     "next": "^16.0.6",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -61,6 +69,7 @@
     "baseline-browser-mapping": "^2.9.19",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "concurrently": "^9.2.1",
     "nx": "22.1.3",
     "prettier": "^2.6.2",
     "prisma": "^7.3.0",
