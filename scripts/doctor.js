@@ -62,6 +62,10 @@ const envVars = parseEnv(envPath);
 const databaseUrl = envVars.DATABASE_URL;
 const jwtSecret = envVars.JWT_ACCESS_SECRET;
 const webhookSecret = envVars.MPESA_WEBHOOK_SECRET;
+const firebaseApiKey = envVars.NEXT_PUBLIC_FIREBASE_API_KEY;
+const firebaseProjectId = envVars.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+const firebaseAuthDomain = envVars.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+const firebaseStorageBucket = envVars.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 
 if (!databaseUrl) {
   fail('DATABASE_URL is missing in .env');
@@ -83,6 +87,31 @@ if (!webhookSecret) {
 }
 if (/change-me|placeholder|your_/i.test(webhookSecret)) {
   fail('MPESA_WEBHOOK_SECRET appears to be a placeholder.', 'Set a strong webhook signing secret in .env');
+}
+const firebaseRequiredKeys = [
+  'NEXT_PUBLIC_FIREBASE_API_KEY',
+  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+];
+const firebaseValues = {
+  NEXT_PUBLIC_FIREBASE_API_KEY: firebaseApiKey,
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: firebaseProjectId,
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: firebaseAuthDomain,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: firebaseStorageBucket,
+};
+const firebasePresent = firebaseRequiredKeys.filter((key) => Boolean(firebaseValues[key]));
+const firebaseMissing = firebaseRequiredKeys.filter((key) => !firebaseValues[key]);
+if (firebasePresent.length > 0 && firebaseMissing.length > 0) {
+  fail(
+    'Firebase configuration is partially set in .env.',
+    `Set all required keys or remove all Firebase keys. Missing: ${firebaseMissing.join(', ')}`
+  );
+}
+if (firebasePresent.length === 0) {
+  info('Firebase config not provided. Firebase features will stay disabled in UI.');
+} else {
+  info('Firebase config keys are present.');
 }
 
 info('Environment file checks passed.');
