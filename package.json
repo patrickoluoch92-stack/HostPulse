@@ -3,15 +3,16 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "prisma:generate": "prisma generate --schema=../prisma/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema=../prisma/schema.prisma",
-    "prisma:seed": "ts-node ../prisma/seed.ts",
-    "prisma:studio": "prisma studio --schema=../prisma/schema.prisma",
-    "start:frontend": "nx run apps:dev",
-    "start:api": "nx run api:serve"
+    "doctor": "node scripts/doctor.js",
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
+    "start:frontend": "npm run doctor && nx run apps:dev",
+    "start:api": "npm run doctor && nx run api:serve"
   },
   "prisma": {
-    "seed": "ts-node ../prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "private": true,
   "dependencies": {

@@ -121,7 +121,10 @@ export default function Index() {
 
       const payRes = await fetch(`${API_BASE}/payments/mpesa/stk-push`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           bookingId: booking.id,
           phone: mpesaPhone,

@@ -13,6 +13,8 @@ import { RevenueService } from '../payments/providers/revenue.service';
 import { PayoutService } from '../payments/providers/payout.service';
 import { EscrowService } from '../payments/providers/escrow.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 /**
  * FinancialsController - Admin financial oversight and reporting
@@ -24,7 +26,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
  * - Financial dashboard
  */
 @Controller('admin/financials')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class FinancialsController {
   constructor(
     private readonly prisma: PrismaService,

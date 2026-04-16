@@ -59,10 +59,18 @@ PORT=3000
 MPESA_CONSUMER_KEY=your-key
 DATABASE_URL=postgresql://username:<REPLACE_WITH_DB_PASSWORD>@localhost:5432/hostpulse
 JWT_ACCESS_SECRET=<REPLACE_WITH_JWT_ACCESS_SECRET>
+MPESA_WEBHOOK_SECRET=<REPLACE_WITH_WEBHOOK_SECRET>
 
 MPESA_CONSUMER_SECRET=<REPLACE_WITH_MPESA_CONSUMER_SECRET>
 # ... other env vars
 ```
+
+### Bootstrap Doctor Check
+Run the doctor before starting API/frontend:
+```powershell
+npm run doctor
+```
+This validates required env values and regenerates Prisma Client.
 
 ## 🔧 Troubleshooting
 

@@ -20,12 +20,12 @@ Wait until you see **“Ready”** or **“compiled”** in the terminal, then o
 
 ### Backend (API) – port 3000
 ```powershell
-npx nx run api:serve
+npm run start:api
 ```
 - API: **http://127.0.0.1:3000/api**
 
 ### Run both (two terminals)
-1. Terminal 1: `npx nx run api:serve`
+1. Terminal 1: `npm run start:api`
 2. Terminal 2: `npx nx run apps:dev` (or `.\run-frontend.ps1` for frontend)
 3. Open **http://127.0.0.1:4200** for the app and **http://127.0.0.1:3000/api** for the API.
 
@@ -46,7 +46,7 @@ npx nx run api:serve
    On some Windows setups this fixes “connection refused”: **http://127.0.0.1:4200** (frontend), **http://127.0.0.1:3000/api** (backend).
 
 2. **Start the server first**  
-   Run `npx nx run apps:dev` (frontend) or `npx nx run api:serve` (backend). Wait until you see **“Ready”** or the “compiled” message before opening the browser.
+   Run `npx nx run apps:dev` (frontend) or `npm run start:api` (backend). Wait until you see **“Ready”** or the “compiled” message before opening the browser.
 
 3. **Use http (not https)** — ports 4200 (frontend) and 3000 (API).
 

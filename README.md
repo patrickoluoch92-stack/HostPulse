@@ -9,6 +9,12 @@ This repository is an Nx workspace that contains a NestJS API and a Next.js fron
 Basic commands:
 
 ```sh
+# bootstrap validation (env + prisma client)
+npm run doctor
+
+# run the API in development (with doctor precheck)
+npm run start:api
+
 # run the API in development
 npm --prefix api run start:dev
 

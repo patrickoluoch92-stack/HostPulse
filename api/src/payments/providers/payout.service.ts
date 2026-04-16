@@ -276,15 +276,16 @@ export class PayoutService {
       // Update payout status based on result
       const resultCode = result.Result?.ResultCode || result.ResultCode;
       const resultDesc = result.Result?.ResultDescription || result.ResultDescription;
+      const normalizedResultCode = String(resultCode);
 
       let payoutStatus: 'pending' | 'processing' | 'paid' | 'failed' = 'failed';
 
-      if (resultCode === '0') {
+      if (normalizedResultCode === '0') {
         payoutStatus = 'paid';
         this.logger.log(`Payout successful for revenue record ${revenueRecord.id}`);
       } else {
         this.logger.warn(
-          `Payout failed for revenue record ${revenueRecord.id}. Code: ${resultCode}, Desc: ${resultDesc}`,
+          `Payout failed for revenue record ${revenueRecord.id}. Code: ${normalizedResultCode}, Desc: ${resultDesc}`,
         );
       }
 

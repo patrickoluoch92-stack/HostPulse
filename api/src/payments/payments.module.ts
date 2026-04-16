@@ -7,6 +7,7 @@ import { EscrowService } from './providers/escrow.service';
 import { RevenueService } from './providers/revenue.service';
 import { PayoutService } from './providers/payout.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { WebhookSignatureGuard } from '../auth/webhook-signature.guard';
 
 @Module({
   imports: [PrismaModule],
@@ -18,6 +19,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     EscrowService,
     RevenueService,
     PayoutService,
+    WebhookSignatureGuard,
   ],
   exports: [PaymentsService, EscrowService, RevenueService, PayoutService],
 })
