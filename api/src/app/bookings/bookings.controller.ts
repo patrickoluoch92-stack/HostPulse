@@ -7,18 +7,18 @@ import { BookingsService } from './bookings.service';
 class CreateBookingDto {
   @IsInt()
   @Type(() => Number)
-  propertyId: number;
+  propertyId!: number;
 
   @IsISO8601()
-  startDate: string;
+  startDate!: string;
 
   @IsISO8601()
-  endDate: string;
+  endDate!: string;
 
   @IsNumber()
   @Type(() => Number)
   @IsPositive()
-  total: number;
+  total!: number;
 }
 
 @Controller('bookings')
@@ -27,9 +27,8 @@ export class BookingsController {
   constructor(private bookingsService: BookingsService) {}
 
   @Post()
-  async create(@Request() req, @Body() dto: CreateBookingDto) {
-    const userId = req.user?.id ?? req.user?.userId ?? req.user?.sub;
-    // (debug logs removed)
+  async create(@Request() req: any, @Body() dto: CreateBookingDto) {
+    const userId: number = req.user?.id ?? req.user?.userId ?? req.user?.sub;
     return this.bookingsService.create(
       userId,
       dto.propertyId,
