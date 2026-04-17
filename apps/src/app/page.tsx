@@ -10,6 +10,7 @@ export default function Index() {
   const [user, setUser] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(true);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Auth form state
   const [email, setEmail] = useState('');
@@ -26,17 +27,24 @@ export default function Index() {
   const [bookingStatus, setBookingStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('hostpulse_token');
-    const storedUser = localStorage.getItem('hostpulse_user');
-    if (stored) {
-      setToken(stored);
-      setUser(storedUser ? JSON.parse(storedUser) : null);
-      setShowAuth(false);
+    try {
+      const stored = localStorage.getItem('hostpulse_token');
+      const storedUser = localStorage.getItem('hostpulse_user');
+      if (stored) {
+        setToken(stored);
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+        setShowAuth(false);
+      }
+    } catch {
+      localStorage.removeItem('hostpulse_token');
+      localStorage.removeItem('hostpulse_user');
     }
   }, []);
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     setAuthStatus('Processing...');
 
     try {
@@ -74,6 +82,8 @@ export default function Index() {
           ? 'Cannot reach API. Ensure the backend is running: npx nx run api:serve'
           : `Error: ${msg}`
       );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -88,12 +98,15 @@ export default function Index() {
 
   async function handleBooking(e: React.FormEvent) {
     e.preventDefault();
-    setBookingStatus('Creating booking...');
+    if (isSubmitting) return;
 
     if (!token) {
       setBookingStatus('Error: Please log in first');
       return;
     }
+
+    setIsSubmitting(true);
+    setBookingStatus('Creating booking...');
 
     try {
       const bookingRes = await fetch(`${API_BASE}/bookings`, {
@@ -121,7 +134,10 @@ export default function Index() {
 
       const payRes = await fetch(`${API_BASE}/payments/mpesa/stk-push`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           bookingId: booking.id,
           phone: mpesaPhone,
@@ -163,6 +179,8 @@ export default function Index() {
       }
     } catch (err: any) {
       setBookingStatus(`Error: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -231,8 +249,8 @@ export default function Index() {
             </label>
           )}
 
-          <button type="submit" style={{ padding: '0.75rem' }}>
-            {authMode === 'login' ? 'Login' : 'Register'}
+          <button type="submit" disabled={isSubmitting} style={{ padding: '0.75rem', opacity: isSubmitting ? 0.6 : 1 }}>
+            {isSubmitting ? 'Processing...' : authMode === 'login' ? 'Login' : 'Register'}
           </button>
         </form>
 
@@ -319,8 +337,8 @@ export default function Index() {
           />
         </label>
 
-        <button type="submit" style={{ padding: '0.75rem' }}>
-          Create Booking &amp; Pay via M-PESA (Stub)
+        <button type="submit" disabled={isSubmitting} style={{ padding: '0.75rem', opacity: isSubmitting ? 0.6 : 1 }}>
+          {isSubmitting ? 'Processing...' : 'Create Booking & Pay via M-PESA'}
         </button>
       </form>
 

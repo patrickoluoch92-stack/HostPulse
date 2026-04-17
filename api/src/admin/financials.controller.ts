@@ -6,13 +6,13 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
-  ParseBoolPipe,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RevenueService } from '../payments/providers/revenue.service';
 import { PayoutService } from '../payments/providers/payout.service';
 import { EscrowService } from '../payments/providers/escrow.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { Roles, RolesGuard } from '../app/auth/roles.guard';
 
 /**
  * FinancialsController - Admin financial oversight and reporting
@@ -24,7 +24,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
  * - Financial dashboard
  */
 @Controller('admin/financials')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles('admin')
 export class FinancialsController {
   constructor(
     private readonly prisma: PrismaService,

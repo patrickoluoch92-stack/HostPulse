@@ -82,15 +82,13 @@ export class DarajaAuthService {
 
       if (response.data.access_token) {
         this.cachedToken = response.data.access_token;
-        // Daraja tokens typically expire in 3600 seconds (1 hour)
-        // We'll refresh 60 seconds before expiry
         const expiresIn = response.data.expires_in || 3600;
         this.tokenExpiresAt = Math.floor(Date.now() / 1000) + expiresIn - this.tokenRefreshBuffer;
 
         this.logger.log(
           `Daraja OAuth token obtained. Expires in ${expiresIn} seconds.`,
         );
-        return this.cachedToken;
+        return this.cachedToken!;
       } else {
         throw new Error('No access token in response');
       }

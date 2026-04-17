@@ -21,8 +21,7 @@ export class PaymentsService {
    * Initiate M-Pesa STK Push with full payment flow
    * Includes escrow setup and revenue calculation
    */
-  async initiateStkPush(bookingId: number, phone: string, email?: string, name?: string) {
-    // Find booking
+  async initiateStkPush(bookingId: number, phone: string, requestingUserId?: number) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
       include: {
@@ -37,6 +36,7 @@ export class PaymentsService {
         },
         user: {
           select: {
+            id: true,
             email: true,
             name: true,
             firstName: true,
@@ -47,6 +47,10 @@ export class PaymentsService {
     });
 
     if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (requestingUserId && booking.userId !== requestingUserId) {
       throw new NotFoundException('Booking not found');
     }
 
@@ -64,9 +68,8 @@ export class PaymentsService {
       };
     }
 
-    // Use customer info from booking if available
-    const customerEmail = email || booking.user?.email || `booking${bookingId}@hostpulse.com`;
-    const customerName = name || booking.user?.name || 
+    const customerEmail = booking.user?.email || `booking${bookingId}@hostpulse.com`;
+    const customerName = booking.user?.name || 
       (booking.user?.firstName && booking.user?.lastName 
         ? `${booking.user.firstName} ${booking.user.lastName}` 
         : 'HostPulse Customer');
@@ -131,134 +134,120 @@ export class PaymentsService {
    * Processes payment completion, sets up escrow, and calculates revenue
    */
   async handleWebhook(body: any) {
-    this.logger.log('Received Daraja webhook', JSON.stringify(body));
+    this.logger.log('Received Daraja webhook');
 
     try {
-      // Daraja STK Push callback structure
       const callbackMetadata = body.Body?.stkCallback?.CallbackMetadata;
       const resultCode = body.Body?.stkCallback?.ResultCode;
       const resultDesc = body.Body?.stkCallback?.ResultDesc;
-      const merchantRequestId = body.Body?.stkCallback?.MerchantRequestID;
       const checkoutRequestId = body.Body?.stkCallback?.CheckoutRequestID;
 
       if (!checkoutRequestId) {
         this.logger.warn('Webhook missing CheckoutRequestID');
-        return {
-          ResultCode: 0,
-          ResultDesc: 'Webhook received but missing CheckoutRequestID',
-        };
+        return { ResultCode: 0, ResultDesc: 'Accepted' };
       }
 
-      // Find payment by checkout request ID
       const payment = await this.prisma.payment.findFirst({
-        where: {
-          mpesaTxId: checkoutRequestId,
-        },
+        where: { mpesaTxId: checkoutRequestId },
         include: {
           booking: {
-            include: {
-              property: {
-                include: {
-                  host: true,
-                },
-              },
-            },
+            include: { property: { include: { host: true } } },
           },
         },
       });
 
       if (!payment) {
         this.logger.warn(`Payment not found for CheckoutRequestID: ${checkoutRequestId}`);
-        return {
-          ResultCode: 0,
-          ResultDesc: 'Payment not found',
-        };
+        return { ResultCode: 0, ResultDesc: 'Accepted' };
       }
 
-      // Process payment result
+      if (payment.processedAt) {
+        this.logger.warn(`Duplicate webhook for payment ${payment.id}, skipping`);
+        return { ResultCode: 0, ResultDesc: 'Already processed' };
+      }
+
       if (resultCode === 0 && callbackMetadata) {
-        // Payment successful
         const receiptNumber = callbackMetadata.Item?.find(
           (item: any) => item.Name === 'MpesaReceiptNumber',
         )?.Value;
         const transactionDate = callbackMetadata.Item?.find(
           (item: any) => item.Name === 'TransactionDate',
         )?.Value;
-        const phoneNumber = callbackMetadata.Item?.find(
-          (item: any) => item.Name === 'PhoneNumber',
-        )?.Value;
 
-        // Update payment status
-        await this.prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: 'success',
-            receiptNumber: receiptNumber?.toString(),
-            transactionDate: transactionDate
-              ? new Date(transactionDate.toString())
-              : new Date(),
-            resultCode: resultCode.toString(),
-            resultDesc: resultDesc,
-            processedAt: new Date(),
-          },
-        });
-
-        // Set up escrow (hold funds until check-in + 48h)
         const bookingDates = payment.booking.dates as any;
         const checkInDate = bookingDates?.start
           ? new Date(bookingDates.start)
-          : new Date(); // Fallback to now if dates not available
-        await this.escrowService.setEscrowHold(payment.id, checkInDate);
+          : new Date();
+        const escrowReleaseDate = new Date(checkInDate);
+        escrowReleaseDate.setHours(escrowReleaseDate.getHours() + 48);
 
-        // Calculate and record revenue
-        await this.revenueService.calculateAndRecordRevenue(
-          payment.bookingId,
-          Number(payment.amount),
-        );
+        const bookingTotal = Number(payment.booking.total);
+        const bookingCommission = Number(payment.booking.commission);
+        const commissionRate =
+          bookingCommission > 0 && bookingTotal > 0
+            ? bookingCommission / bookingTotal
+            : 0.15;
+        const grossAmount = Number(payment.amount);
+        const commission = Math.round(grossAmount * commissionRate * 100) / 100;
+        const vat = Math.round(commission * 0.16 * 100) / 100;
+        const netAmount = Math.round((grossAmount - commission) * 100) / 100;
 
-        // Update booking status
-        await this.prisma.booking.update({
-          where: { id: payment.bookingId },
-          data: {
-            status: 'confirmed',
-          },
-        });
+        await this.prisma.$transaction([
+          this.prisma.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: 'success',
+              receiptNumber: receiptNumber?.toString(),
+              transactionDate: transactionDate
+                ? new Date(transactionDate.toString())
+                : new Date(),
+              resultCode: resultCode.toString(),
+              resultDesc,
+              processedAt: new Date(),
+              escrowHeldUntil: escrowReleaseDate,
+              escrowReleased: false,
+            },
+          }),
+          this.prisma.revenueRecord.create({
+            data: {
+              bookingId: payment.bookingId,
+              hostId: payment.booking.property.hostId,
+              propertyId: payment.booking.propertyId,
+              grossAmount,
+              commission,
+              vat,
+              netAmount,
+              payoutStatus: 'pending',
+            },
+          }),
+          this.prisma.booking.update({
+            where: { id: payment.bookingId },
+            data: { status: 'confirmed' },
+          }),
+        ]);
 
         this.logger.log(
-          `Payment ${payment.id} completed successfully. Receipt: ${receiptNumber}, Escrow set, Revenue recorded.`,
+          `Payment ${payment.id} completed. Receipt: ${receiptNumber}, Escrow+Revenue+Booking updated atomically.`,
         );
 
-        return {
-          ResultCode: 0,
-          ResultDesc: 'Payment processed successfully',
-        };
+        return { ResultCode: 0, ResultDesc: 'Accepted' };
       } else {
-        // Payment failed
         await this.prisma.payment.update({
           where: { id: payment.id },
           data: {
             status: 'failed',
             resultCode: resultCode?.toString(),
-            resultDesc: resultDesc,
+            resultDesc,
             processedAt: new Date(),
           },
         });
 
-        this.logger.warn(
-          `Payment ${payment.id} failed. Code: ${resultCode}, Desc: ${resultDesc}`,
-        );
-
-        return {
-          ResultCode: 0,
-          ResultDesc: 'Payment failure recorded',
-        };
+        this.logger.warn(`Payment ${payment.id} failed. Code: ${resultCode}`);
+        return { ResultCode: 0, ResultDesc: 'Accepted' };
       }
     } catch (error: any) {
       this.logger.error(`Webhook processing error: ${error.message}`, error.stack);
-      return {
-        ResultCode: 1,
-        ResultDesc: error.message,
-      };
+      return { ResultCode: 1, ResultDesc: 'Internal processing error' };
     }
   }
 

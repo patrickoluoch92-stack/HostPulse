@@ -52,9 +52,7 @@ export class AuthService {
           throw new ConflictException('Email already registered');
         }
         if (e.code === 'P1001' || e.code === 'P1002') {
-          throw new InternalServerErrorException(
-            'Database is unreachable. Check DATABASE_URL and that PostgreSQL is running.',
-          );
+          throw new InternalServerErrorException('Service temporarily unavailable');
         }
       }
       throw e;

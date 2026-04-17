@@ -44,17 +44,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
-    const safeMessage =
-      status >= 500
-        ? isDev
-          ? actualError
-          : 'Something went wrong. Please try again.'
-        : msg;
+    let safeMessage: string;
+    if (status >= 500) {
+      safeMessage = isDev ? actualError : 'Something went wrong. Please try again.';
+    } else {
+      safeMessage = msg;
+    }
 
     response.status(status).json({
       statusCode: status,
       message: safeMessage,
-      error: status >= 500 ? 'Internal Server Error' : undefined,
+      ...(status >= 400 && status < 500 ? { error: body.message } : {}),
     });
   }
 }
