@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**
@@ -66,7 +66,7 @@ export class EscrowService {
       });
 
       if (!payment) {
-        throw new Error(`Payment ${paymentId} not found`);
+        throw new NotFoundException(`Payment ${paymentId} not found`);
       }
 
       if (payment.escrowReleased) {
@@ -75,7 +75,7 @@ export class EscrowService {
       }
 
       if (payment.status !== 'success') {
-        throw new Error(`Cannot release escrow for payment with status: ${payment.status}`);
+        throw new BadRequestException('Cannot release escrow for incomplete payment');
       }
 
       // Update payment escrow status
@@ -157,7 +157,7 @@ export class EscrowService {
     });
 
     if (!payment) {
-      throw new Error(`Payment ${paymentId} not found`);
+      throw new NotFoundException(`Payment ${paymentId} not found`);
     }
 
     const now = new Date();

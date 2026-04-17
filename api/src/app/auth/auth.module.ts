@@ -6,17 +6,24 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PrismaModule } from '../../prisma/prisma.module';
 
+const jwtSecret = process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET;
+if (!jwtSecret) {
+  throw new Error(
+    'JWT secret not configured. Set JWT_SECRET or JWT_ACCESS_SECRET in your .env file.',
+  );
+}
+
 @Module({
   imports: [
     PrismaModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-      signOptions: { expiresIn: '7d' },
+      secret: jwtSecret,
+      signOptions: { expiresIn: '1d' },
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

@@ -6,25 +6,26 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { InitiateMpesaPaymentDto } from './dto/initiate-mpesa-payment.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('payments/mpesa')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('stk-push')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async initiateStkPush(
-    @Body() body: { bookingId: number; phone: string; email?: string; name?: string },
+    @Request() req,
+    @Body() dto: InitiateMpesaPaymentDto,
   ) {
     return this.paymentsService.initiateStkPush(
-      body.bookingId,
-      body.phone,
-      body.email,
-      body.name,
+      dto.bookingId,
+      dto.phone,
+      req.user?.id,
     );
   }
 
@@ -44,22 +45,22 @@ export class PaymentsController {
   }
 
   @Get('verify/:paymentId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async verifyPayment(@Param('paymentId', ParseIntPipe) paymentId: number) {
     return this.paymentsService.verifyPayment(paymentId);
   }
 
   @Post('escrow/release/:paymentId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async releaseEscrow(
+    @Request() req,
     @Param('paymentId', ParseIntPipe) paymentId: number,
-    @Body() body: { releasedBy?: number },
   ) {
-    return this.paymentsService.releaseEscrow(paymentId, body.releasedBy);
+    return this.paymentsService.releaseEscrow(paymentId, req.user?.id);
   }
 
   @Get('escrow/status/:paymentId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async getEscrowStatus(@Param('paymentId', ParseIntPipe) paymentId: number) {
     return this.paymentsService.getEscrowStatus(paymentId);
   }

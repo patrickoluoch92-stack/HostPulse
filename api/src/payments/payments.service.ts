@@ -21,8 +21,7 @@ export class PaymentsService {
    * Initiate M-Pesa STK Push with full payment flow
    * Includes escrow setup and revenue calculation
    */
-  async initiateStkPush(bookingId: number, phone: string, email?: string, name?: string) {
-    // Find booking
+  async initiateStkPush(bookingId: number, phone: string, requestingUserId?: number) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
       include: {
@@ -37,6 +36,7 @@ export class PaymentsService {
         },
         user: {
           select: {
+            id: true,
             email: true,
             name: true,
             firstName: true,
@@ -47,6 +47,10 @@ export class PaymentsService {
     });
 
     if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (requestingUserId && booking.userId !== requestingUserId) {
       throw new NotFoundException('Booking not found');
     }
 
@@ -64,9 +68,8 @@ export class PaymentsService {
       };
     }
 
-    // Use customer info from booking if available
-    const customerEmail = email || booking.user?.email || `booking${bookingId}@hostpulse.com`;
-    const customerName = name || booking.user?.name || 
+    const customerEmail = booking.user?.email || `booking${bookingId}@hostpulse.com`;
+    const customerName = booking.user?.name || 
       (booking.user?.firstName && booking.user?.lastName 
         ? `${booking.user.firstName} ${booking.user.lastName}` 
         : 'HostPulse Customer');
@@ -257,7 +260,7 @@ export class PaymentsService {
       this.logger.error(`Webhook processing error: ${error.message}`, error.stack);
       return {
         ResultCode: 1,
-        ResultDesc: error.message,
+        ResultDesc: 'Internal processing error',
       };
     }
   }

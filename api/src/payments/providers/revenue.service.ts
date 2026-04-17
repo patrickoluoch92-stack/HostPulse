@@ -43,10 +43,11 @@ export class RevenueService {
         throw new Error(`Booking ${bookingId} not found`);
       }
 
-      // Use booking commission if set, otherwise use default rate
+      const bookingTotal = Number(booking.total);
+      const bookingCommission = Number(booking.commission);
       const commissionRate =
-        booking.commission && Number(booking.commission) > 0
-          ? Number(booking.commission) / Number(booking.total)
+        bookingCommission > 0 && bookingTotal > 0
+          ? bookingCommission / bookingTotal
           : this.defaultCommissionRate;
 
       // Calculate commission

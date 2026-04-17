@@ -73,6 +73,10 @@ model Payment {
   updatedAt DateTime @updatedAt
 
   booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([mpesaTxId])
+  @@index([bookingId])
+  @@index([status, escrowReleased, escrowHeldUntil])
 }
 
 model RevenueRecord {
@@ -94,6 +98,10 @@ model RevenueRecord {
   host     User      @relation(fields: [hostId], references: [id])
   property Property  @relation(fields: [propertyId], references: [id])
   booking  Booking   @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+  @@index([hostId])
+  @@index([payoutStatus])
 }
 
 model Booking {
@@ -113,4 +121,8 @@ model Booking {
   property Property  @relation(fields: [propertyId], references: [id])
   payments Payment[]
   revenueRecords RevenueRecord[]
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
 }
