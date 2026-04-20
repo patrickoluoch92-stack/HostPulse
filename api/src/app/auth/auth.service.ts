@@ -57,6 +57,19 @@ export class AuthService {
           );
         }
       }
+      if (e instanceof Prisma.PrismaClientInitializationError) {
+        throw new InternalServerErrorException(
+          'Database client failed to initialize. Check DATABASE_URL and connectivity.',
+        );
+      }
+      if (e instanceof Prisma.PrismaClientValidationError) {
+        throw new BadRequestException('Invalid registration payload.');
+      }
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(
+          `Registration failed due to a server error: ${e.message}`,
+        );
+      }
       throw e;
     }
   }

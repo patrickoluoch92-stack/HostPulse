@@ -1,13 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import {
+  ensureFirebaseInitialized,
+  getFirestoreInstance,
+  getRealtimeDatabaseInstance,
+  getStorageInstance,
+  firebaseEnabled,
+  firebaseStatusMessage,
+} from '../lib/firebase';
 
 // API proxy route (Next.js rewrites to backend) to avoid cross-origin issues.
 const API_BASE = '/api-proxy';
 
 export default function Index() {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
   const [showAuth, setShowAuth] = useState(true);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
@@ -24,6 +32,7 @@ export default function Index() {
   const [total, setTotal] = useState(10000);
   const [mpesaPhone, setMpesaPhone] = useState('+2547');
   const [bookingStatus, setBookingStatus] = useState<string | null>(null);
+  const [firebaseStatus, setFirebaseStatus] = useState<string>('Checking Firebase...');
 
   useEffect(() => {
     const stored = localStorage.getItem('hostpulse_token');
@@ -33,6 +42,23 @@ export default function Index() {
       setUser(storedUser ? JSON.parse(storedUser) : null);
       setShowAuth(false);
     }
+
+    try {
+      const app = ensureFirebaseInitialized();
+      const firestore = getFirestoreInstance();
+      const realtimeDb = getRealtimeDatabaseInstance();
+      const storage = getStorageInstance();
+      const enabledServices = [
+        app ? 'Auth' : null,
+        firestore ? 'Firestore' : null,
+        realtimeDb ? 'Realtime DB' : null,
+        storage ? 'Storage' : null,
+      ].filter(Boolean);
+      setFirebaseStatus(`Firebase ready: ${enabledServices.join(', ')}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown Firebase error';
+      setFirebaseStatus(firebaseEnabled ? `Firebase unavailable: ${message}` : firebaseStatusMessage);
+    }
   }, []);
 
   async function handleAuth(e: React.FormEvent) {
@@ -41,7 +67,7 @@ export default function Index() {
 
     try {
       const endpoint = authMode === 'login' ? 'login' : 'register';
-      const body: any = { email, password };
+      const body: { email: string; password: string; phone?: string } = { email, password };
       if (authMode === 'register' && phone) {
         body.phone = phone;
       }
@@ -121,7 +147,10 @@ export default function Index() {
 
       const payRes = await fetch(`${API_BASE}/payments/mpesa/stk-push`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           bookingId: booking.id,
           phone: mpesaPhone,
@@ -241,6 +270,9 @@ export default function Index() {
             {authStatus}
           </p>
         )}
+        <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: firebaseStatus.includes('unavailable') ? 'red' : '#2f855a' }}>
+          {firebaseStatus}
+        </p>
       </main>
     );
   }
@@ -329,6 +361,9 @@ export default function Index() {
           <strong>Status:</strong> {bookingStatus}
         </p>
       )}
+      <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: firebaseStatus.includes('unavailable') ? 'red' : '#2f855a' }}>
+        {firebaseStatus}
+      </p>
     </main>
   );
 }

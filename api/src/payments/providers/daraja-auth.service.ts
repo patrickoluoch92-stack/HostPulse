@@ -1,5 +1,5 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
 import * as crypto from 'crypto';
 
 /**
@@ -87,10 +87,8 @@ export class DarajaAuthService {
         const expiresIn = response.data.expires_in || 3600;
         this.tokenExpiresAt = Math.floor(Date.now() / 1000) + expiresIn - this.tokenRefreshBuffer;
 
-        this.logger.log(
-          `Daraja OAuth token obtained. Expires in ${expiresIn} seconds.`,
-        );
-        return this.cachedToken;
+        this.logger.log(`Daraja OAuth token obtained. Expires in ${expiresIn} seconds.`);
+        return response.data.access_token;
       } else {
         throw new Error('No access token in response');
       }
