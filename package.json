@@ -9,9 +9,9 @@
     "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
-    "dev": "npm run doctor && concurrently -k -n API,WEB -c yellow,cyan \"nx run api:serve\" \"nx run apps:dev\"",
-    "start:frontend": "npm run doctor && nx run apps:dev",
-    "start:api": "npm run doctor && nx run api:serve",
+    "dev": "npm run doctor && concurrently -k -n API,WEB -c yellow,cyan \"npx nx run api:serve\" \"npx nx run apps:dev\"",
+    "start:frontend": "npm run doctor && npx nx run apps:dev",
+    "start:api": "npm run doctor && npx nx run api:serve",
     "firebase:check": "node scripts/firebase-check.js"
   },
   "prisma": {

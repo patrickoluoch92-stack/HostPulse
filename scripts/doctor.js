@@ -6,6 +6,8 @@ const ROOT = process.cwd();
 const envPath = path.join(ROOT, '.env');
 const envExamplePath = path.join(ROOT, '.env.example');
 const schemaPath = path.join(ROOT, 'prisma', 'schema.prisma');
+const workspaceTsConfigPath = path.join(ROOT, 'tsconfig.base.json');
+const fallbackTsConfigPath = path.join(ROOT, 'tsconfig.json');
 
 function fail(message, details) {
   console.error(`\n[doctor] ERROR: ${message}`);
@@ -56,6 +58,22 @@ if (!fs.existsSync(envPath)) {
 
 if (!fs.existsSync(schemaPath)) {
   fail(`Prisma schema not found at ${schemaPath}`);
+}
+
+if (!fs.existsSync(workspaceTsConfigPath) && !fs.existsSync(fallbackTsConfigPath)) {
+  fail(
+    'Nx workspace TypeScript config is missing.',
+    `Expected either ${workspaceTsConfigPath} or ${fallbackTsConfigPath}.`
+  );
+}
+
+try {
+  require.resolve('@nx/js/executors.json', { paths: [ROOT] });
+} catch {
+  fail(
+    'Unable to resolve @nx/js executor package.',
+    'Run npm install in the workspace root and use npx nx to run targets.'
+  );
 }
 
 const envVars = parseEnv(envPath);
