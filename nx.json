@@ -10,9 +10,7 @@
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
+        "typecheck": { "targetName": "typecheck" },
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",
@@ -43,39 +41,17 @@
         "watchDepsTargetName": "watch-deps"
       }
     },
-    {
-      "plugin": "@nx/playwright/plugin",
-      "options": {
-        "targetName": "e2e"
-      }
-    }
+    { "plugin": "@nx/playwright/plugin", "options": { "targetName": "e2e" } }
   ],
   "generators": {
-    "@nx/next": {
-      "application": {
-        "style": "css",
-        "linter": "none"
-      }
-    }
+    "@nx/next": { "application": { "style": "css", "linter": "none" } }
   },
-  "projects": {
-    "api": "api"
-  },
+  "projects": { "api": "api" },
   "targetDefaults": {
-    "prisma:generate": {
-      "outputs": ["{projectRoot}/build"],
-      "cache": true
-    },
-    "prisma:seed": {
-      "outputs": ["{projectRoot}/dist"],
-      "cache": true
-    },
-    "prisma:studio": {
-      "outputs": ["{projectRoot}/lib"],
-      "cache": true
-    },
-    "prisma:migrate": {
-      "cache": true
-    }
-  }
+    "prisma:generate": { "outputs": ["{projectRoot}/build"], "cache": true },
+    "prisma:seed": { "outputs": ["{projectRoot}/dist"], "cache": true },
+    "prisma:studio": { "outputs": ["{projectRoot}/lib"], "cache": true },
+    "prisma:migrate": { "cache": true }
+  },
+  "nxCloudId": "69e626e57e952e134933ffbc"
 }
