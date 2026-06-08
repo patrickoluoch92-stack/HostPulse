@@ -1,2 +1,118 @@
-.page {
+.authMain {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.bookingMain {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.authModeToggle {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toggleButton {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.toggleButton:hover {
+  background: #f6f8fa;
+}
+
+.toggleButtonActive {
+  font-weight: 700;
+  border-color: #0969da;
+}
+
+.formGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.formGridWithTopSpacing {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  margin-top: 0.25rem;
+}
+
+.primaryButton {
+  padding: 0.75rem;
+  border: 1px solid #1f6feb;
+  border-radius: 10px;
+  background: #1f6feb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primaryButton:hover {
+  background: #1a5fd0;
+  border-color: #1a5fd0;
+}
+
+.secondaryButton {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: #f6f8fa;
+}
+
+.status {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.statusError {
+  color: #d1242f;
+}
+
+.statusSuccess {
+  color: #1a7f37;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mutedText {
+  font-size: 0.9rem;
+}
+
+.subtleText {
+  font-size: 0.9rem;
+  color: #57606a;
 }

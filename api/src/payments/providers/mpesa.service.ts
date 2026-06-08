@@ -1,6 +1,7 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { DarajaAuthService } from './daraja-auth.service';
+import { darajaTimestampNairobi } from '../../utils/daraja-timestamp.util';
 
 interface StkPushParams {
   phone: string;
@@ -64,6 +65,7 @@ interface DarajaStkQueryResponse {
 export class MpesaService {
   private readonly logger = new Logger(MpesaService.name);
   private readonly axiosInstance: AxiosInstance;
+  private readonly queryUrl: string;
 
   constructor(private readonly darajaAuth: DarajaAuthService) {
     this.axiosInstance = axios.create({
@@ -73,6 +75,7 @@ export class MpesaService {
         'Content-Type': 'application/json',
       },
     });
+    this.queryUrl = process.env.MPESA_QUERY_URL || '/mpesa/stkpush/v1/query';
   }
 
   /**
@@ -88,24 +91,29 @@ export class MpesaService {
 
       // Get configuration
       const shortcode = process.env.MPESA_SHORTCODE || '';
-      const callBackUrl = process.env.MPESA_CALLBACK_URL || `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/payments/mpesa/webhook`;
+      const callBackUrl =
+        process.env.MPESA_CALLBACK_URL ||
+        `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/mpesa/callback`;
 
       if (!shortcode) {
         throw new HttpException(
-          'M-Pesa shortcode not configured',
+          'M-Pesa shortcode not configured (MPESA_SHORTCODE)',
           HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
-      // Generate timestamp (YYYYMMDDHHmmss)
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:T]/g, '')
-        .split('.')[0]
-        .replace(/\D/g, '');
+      const passkey = process.env.MPESA_PASSKEY || '';
+      if (!passkey) {
+        throw new HttpException(
+          'M-Pesa passkey not configured (MPESA_PASSKEY)',
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+
+      // Timestamp must be YYYYMMDDHHmmss in Africa/Nairobi per Daraja STK docs
+      const timestamp = darajaTimestampNairobi();
 
       // Generate password (shortcode + passkey + timestamp, base64 encoded)
-      const passkey = process.env.MPESA_PASSKEY || '';
       const passwordString = `${shortcode}${passkey}${timestamp}`;
       const password = Buffer.from(passwordString).toString('base64');
 
@@ -129,7 +137,7 @@ export class MpesaService {
       };
 
       this.logger.log(
-        `Initiating Daraja STK push for bookingId=${params.bookingId}, phone=${formattedPhone}, amount=${params.amount}`,
+        `Initiating Daraja STK push for bookingId=${params.bookingId}, phoneTail=${this.maskPhone(formattedPhone)}, amount=${params.amount}`,
       );
 
       // Make STK Push request
@@ -200,22 +208,17 @@ export class MpesaService {
 
       if (!shortcode || !passkey) {
         throw new HttpException(
-          'M-Pesa credentials not configured',
+          'M-Pesa credentials not configured (MPESA_SHORTCODE, MPESA_PASSKEY)',
           HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
-      // Generate timestamp and password
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:T]/g, '')
-        .split('.')[0]
-        .replace(/\D/g, '');
+      const timestamp = darajaTimestampNairobi();
       const passwordString = `${shortcode}${passkey}${timestamp}`;
       const password = Buffer.from(passwordString).toString('base64');
 
       const response = await this.axiosInstance.post<DarajaStkQueryResponse>(
-        '/mpesa/stkpush/v1/query',
+        this.queryUrl,
         {
           BusinessShortCode: shortcode,
           Password: password,
@@ -259,6 +262,10 @@ export class MpesaService {
     }
   }
 
+  normalizePhoneNumber(phone: string): string {
+    return this.formatPhoneNumber(phone);
+  }
+
   /**
    * Format phone number to Daraja format (254XXXXXXXXX)
    */
@@ -288,5 +295,9 @@ export class MpesaService {
     }
 
     return cleaned;
+  }
+
+  private maskPhone(phone: string): string {
+    return phone.slice(-4);
   }
 }

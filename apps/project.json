@@ -9,7 +9,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps",
-        "command": "npx next dev --hostname 127.0.0.1 --port 4200",
+        "command": "npx next dev --webpack --hostname 127.0.0.1 --port 4200",
 "env": {
         "HOST": "127.0.0.1",
         "PORT": "4200"

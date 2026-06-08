@@ -38,5 +38,16 @@
       "problemMatcher": [],
       "label": "nx: nx run @host-pulse/source:prisma:generate"
     }
+    ,
+    {
+      "label": "start-frontend",
+      "type": "shell",
+      "command": "npx nx run apps:dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    }
   ]
 }

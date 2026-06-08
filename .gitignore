@@ -51,3 +51,4 @@ out
 
 # Local env should not be committed
 .env
+.env.local

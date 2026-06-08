@@ -28,6 +28,12 @@ model User {
   properties Property[] @relation("HostProperties")
   bookings   Booking[]
   revenueRecords RevenueRecord[]
+
+  listingsCreated   Listing[] @relation("UserListingsCreated")
+  listingsClaimed   Listing[] @relation("UserListingsClaimed")
+  listingsVerified  Listing[] @relation("UserListingsVerified")
+
+  @@index([role])
 }
 
 model Property {
@@ -45,6 +51,9 @@ model Property {
   host     User      @relation("HostProperties", fields: [hostId], references: [id])
   bookings Booking[]
   revenueRecords RevenueRecord[]
+
+  @@index([hostId])
+  @@index([createdAt])
 }
 
 
@@ -54,14 +63,14 @@ model Payment {
   amount          Float
   method          String    @default("mpesa") // "mpesa", "card", etc.
   status          String    @default("pending") // "pending", "success", "failed"
-  mpesaTxId       String?
+  mpesaTxId       String?   @unique
   phoneNumber     String?
   receiptNumber   String?
   transactionDate DateTime?
   resultCode      String?
   resultDesc      String?
   processedAt     DateTime?
-  idempotencyKey  String?
+  idempotencyKey  String?   @unique
   
   // Escrow fields
   escrowReleased  Boolean   @default(false)
@@ -73,11 +82,15 @@ model Payment {
   updatedAt DateTime @updatedAt
 
   booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId, status])
+  @@index([processedAt])
+  @@index([receiptNumber])
 }
 
 model RevenueRecord {
   id                Int       @id @default(autoincrement())
-  bookingId         Int
+  bookingId         Int       @unique
   hostId            Int
   propertyId        Int
   grossAmount       Decimal   @db.Decimal(10, 2)
@@ -94,6 +107,9 @@ model RevenueRecord {
   host     User      @relation(fields: [hostId], references: [id])
   property Property  @relation(fields: [propertyId], references: [id])
   booking  Booking   @relation(fields: [bookingId], references: [id])
+
+  @@index([hostId, payoutStatus])
+  @@index([createdAt])
 }
 
 model Booking {
@@ -113,4 +129,142 @@ model Booking {
   property Property  @relation(fields: [propertyId], references: [id])
   payments Payment[]
   revenueRecords RevenueRecord[]
+
+  @@index([userId])
+  @@index([propertyId, status, startDate, endDate])
+}
+
+enum ListingCategory {
+  hotel
+  lodge
+  resort
+  airbnb
+  tour_company
+}
+
+enum SourceType {
+  google_places
+}
+
+model Location {
+  id        String @id @default(uuid())
+  name      String?
+  addressLine1 String?
+  city      String?
+  county    String?
+  country   String  @default("Kenya")
+
+  latitude  Float
+  longitude Float
+
+  // Bounding-box friendly indexes (used for fast "nearby" prefiltering).
+  @@index([latitude])
+  @@index([longitude])
+  @@index([latitude, longitude])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings  Listing[]
+}
+
+model Listing {
+  id          String          @id @default(uuid())
+  name        String
+  category    ListingCategory
+  description String?
+
+  phone       String?
+  websiteUrl  String?
+
+  // Aggregated rating summary (can be refreshed by background jobs).
+  ratingAvg   Float?
+  ratingCount Int?
+
+  isVerified      Boolean   @default(false)
+  verificationNote String?
+
+  createdByUserId Int?
+  claimedByUserId Int?
+  verifiedByUserId Int?
+
+  locationId String @unique
+  location   Location @relation(fields: [locationId], references: [id])
+
+  sources    Source[]
+  reviews    Review[]
+  media      Media[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  createdByUser  User? @relation("UserListingsCreated", fields: [createdByUserId], references: [id])
+  claimedByUser  User? @relation("UserListingsClaimed", fields: [claimedByUserId], references: [id])
+  verifiedByUser User? @relation("UserListingsVerified", fields: [verifiedByUserId], references: [id])
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+model Source {
+  id String @id @default(uuid())
+
+  type SourceType
+  provider String?
+  providerPlaceId String
+
+  query String?
+  rawTypes String[]
+  placeUrl String?
+
+  rating Float?
+  ratingCount Int?
+
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id])
+
+  reviews   Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, providerPlaceId])
+  @@index([listingId])
+}
+
+model Review {
+  id String @id @default(uuid())
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  sourceId String?
+  source   Source?  @relation(fields: [sourceId], references: [id])
+
+  authorName String?
+  rating Float
+  text String?
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([rating])
+}
+
+model Media {
+  id String @id @default(uuid())
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  url String
+  type String?
+
+  providerPhotoRef String?
+  sortOrder Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**
@@ -40,7 +40,7 @@ export class RevenueService {
       });
 
       if (!booking) {
-        throw new Error(`Booking ${bookingId} not found`);
+        throw new NotFoundException(`Booking ${bookingId} not found`);
       }
 
       // Use booking commission if set, otherwise use default rate

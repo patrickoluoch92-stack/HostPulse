@@ -1,0 +1,19 @@
+{
+  "plugins": {
+    "migration-to-aws": {
+      "enabled": true
+    },
+    "appwrite-plugin": {
+      "enabled": true
+    },
+    "aws-amplify": {
+      "enabled": true
+    },
+    "render": {
+      "enabled": true
+    },
+    "planetscale": {
+      "enabled": true
+    }
+  }
+}
